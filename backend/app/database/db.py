@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import json
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
@@ -8,8 +9,8 @@ load_dotenv()
 
 # Database connection parameters
 DB_PARAMS = {
-    'dbname': os.getenv('DB_NAME', 'eluvium'),
-    'user': os.getenv('DB_USER', 'frknlke_eluvium'),
+    'dbname': os.getenv('DB_NAME', 'eluvium_new'),
+    'user': os.getenv('DB_USER', 'frknlke'),
     'password': os.getenv('DB_PASSWORD', 'frknlke_eluvium'),
     'host': os.getenv('DB_HOST', 'localhost'),
     'port': os.getenv('DB_PORT', '5432')
@@ -124,6 +125,103 @@ def get_mailbox_by_id(mailbox_id):
             return cur.fetchone()
     except Exception as e:
         print(f"Error fetching mailbox: {e}")
+        raise
+    finally:
+        conn.close() 
+
+def save_email_with_entities(
+    mailbox_id,
+    email_subject,
+    email_body,
+    email_sender,
+    email_recipients,
+    email_timestamp,
+    message_id,
+    thread_id,
+    email_headers,
+    ner_result,
+    model_version="1.0"
+):
+    """
+    Save email data along with extracted entities to the emails table.
+    
+    Args:
+        mailbox_id: UUID of the mailbox
+        email_subject: Subject of the email
+        email_body: Body text of the email
+        email_sender: Sender email address
+        email_recipients: List of recipient email addresses
+        email_timestamp: Timestamp of the email
+        message_id: Original email message ID
+        thread_id: Thread ID for conversation tracking
+        email_headers: Dictionary of email headers
+        ner_result: Dictionary containing NER extraction results
+        model_version: Version of the NER model used
+        
+    Returns:
+        email_id: UUID of the saved email
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            # Prepare the query
+            query = """
+                INSERT INTO emails (
+                    mailbox_id, email_subject, email_body, email_sender, 
+                    email_recipients, email_timestamp, message_id, thread_id, 
+                    email_headers, intent, customer_organization, producer_organization,
+                    people, extracted_date_time, products, monetary_values, 
+                    addresses, phone_numbers, email_addresses,
+                    processing_status, confidence_score, extraction_model_version
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    'processed', 0.85, %s
+                )
+                RETURNING email_id;
+            """
+            
+            # Convert date_time string to timestamp if present
+            extracted_date = None
+            if ner_result.get('date_time'):
+                extracted_date = ner_result['date_time']
+                
+            # Prepare values for query
+            values = [
+                mailbox_id,
+                email_subject,
+                email_body,
+                email_sender,
+                email_recipients,
+                email_timestamp,
+                message_id,
+                thread_id,
+                json.dumps(email_headers) if email_headers else None,
+                ner_result.get('intent'),
+                ner_result.get('customer_organization'),
+                ner_result.get('producer_organization'),
+                ner_result.get('people', []),
+                extracted_date,
+                json.dumps(ner_result.get('products', [])),
+                ner_result.get('monetary_values', []),
+                ner_result.get('addresses', []),
+                [ner_result.get('phone_number')] if ner_result.get('phone_number') else [],
+                ner_result.get('email_addresses', []),
+                model_version
+            ]
+            
+            # Execute the query
+            cur.execute(query, values)
+            result = cur.fetchone()
+            conn.commit()
+            
+            # Extract the UUID as a string
+            if result and 'email_id' in result:
+                return str(result['email_id'])
+            else:
+                return None
+    except Exception as e:
+        conn.rollback()
+        print(f"Error saving email data: {e}")
         raise
     finally:
         conn.close() 

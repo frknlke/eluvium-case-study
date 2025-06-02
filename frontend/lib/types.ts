@@ -6,16 +6,18 @@ export enum Provider {
 }
 
 export enum SyncMethod {
-  POLLING = 'polling',
+  API = 'api',
+  IMAP = 'imap',
   WEBHOOK = 'webhook',
-  IMAP_IDLE = 'imap_idle',
-  SES = 'ses'
+  MANUAL = 'manual'
 }
 
 export enum SyncStatus {
   IDLE = 'idle',
-  RUNNING = 'running',
-  ERROR = 'error'
+  SYNCING = 'syncing',
+  ERROR = 'error',
+  COMPLETED = 'completed',
+  PAUSED = 'paused'
 }
 
 export interface MailboxFormData {

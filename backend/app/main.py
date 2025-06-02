@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import mailbox
+from .routers import search
 
 app = FastAPI(
     title="Eluvium Backend API",
@@ -24,6 +25,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(mailbox.router)
+app.include_router(search.router)
 
 @app.get("/")
 def read_root():

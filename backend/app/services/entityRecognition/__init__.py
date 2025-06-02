@@ -1,1 +1,1 @@
-from .namedEntityRecognition import NamedEntityRecognition
+from .namedEntityRecognition import EntitiyRecognizer

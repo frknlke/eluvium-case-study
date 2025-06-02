@@ -16,6 +16,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showingEmbeddings, setShowingEmbeddings] = useState(false);
+  const [embeddingsCount, setEmbeddingsCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -79,6 +81,31 @@ export default function Dashboard() {
     }
   };
 
+  const handleShowEmbeddings = async () => {
+    setShowingEmbeddings(true);
+    try {
+      const response = await fetch(`${API_URL}/api/search/print-embeddings`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to print embeddings");
+      }
+      
+      const data = await response.json();
+      setEmbeddingsCount(data.count);
+      
+      // Show success message
+      alert(`Successfully printed ${data.count} embeddings to the backend console`);
+    } catch (err: any) {
+      console.error("Error showing embeddings:", err);
+      setError(err.message || "Failed to print embeddings");
+    } finally {
+      setShowingEmbeddings(false);
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
@@ -138,6 +165,44 @@ export default function Dashboard() {
               ))}
             </div>
           )}
+        </div>
+        
+        {/* Advanced Email Search Button */}
+        <div className="my-6 flex justify-center">
+          <Link 
+            href="/search" 
+            className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+          >
+            Advanced Email Search
+          </Link>
+        </div>
+        
+        {/* Embeddings section */}
+        <div className="my-8 border-t pt-6">
+          <h2 className="text-2xl font-semibold mb-4">Vector Database</h2>
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-gray-700">
+                Print all embeddings to the backend console
+                {embeddingsCount !== null && (
+                  <span className="ml-2 text-sm text-gray-500">
+                    Last count: {embeddingsCount} embeddings
+                  </span>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={handleShowEmbeddings}
+              disabled={showingEmbeddings}
+              className={`${
+                showingEmbeddings
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-500 hover:bg-green-600'
+              } text-white font-bold py-2 px-4 rounded-lg transition duration-300`}
+            >
+              {showingEmbeddings ? 'Processing...' : 'Show Embeddings'}
+            </button>
+          </div>
         </div>
         
         <div className="flex justify-center mt-8">

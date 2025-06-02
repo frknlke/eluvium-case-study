@@ -98,7 +98,7 @@ export default function AuthCallback() {
                 refresh_token: refreshToken,
                 token_expiry: tokenExpiry,
                 // Match a valid sync_method in PostgreSQL
-                sync_method: 'polling'
+                sync_method: 'api'
               }),
             },
             5 // 5 max retries

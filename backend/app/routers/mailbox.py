@@ -120,10 +120,13 @@ async def trigger_email_processing(mailbox_id: str):
         
         print(mailbox)
 
-        orchestrator.init_mail_fetcher(
-            mailbox["email_address"], mailbox["refresh_token"], 
-            mailbox["token_expiry"], mailbox["provider"]
-            )
+        result = orchestrator.init_mail_fetcher(
+            mailbox["email_address"], 
+            mailbox["refresh_token"], 
+            mailbox["token_expiry"], 
+            mailbox["provider"],
+            mailbox_id  # Pass the mailbox_id to the orchestrator
+        )
         
         # This is a dummy function - no actual processing is done now
         # In a real implementation, you would trigger background processing here
@@ -131,7 +134,9 @@ async def trigger_email_processing(mailbox_id: str):
         return {
             "message": "Email processing triggered successfully",
             "mailbox_id": mailbox_id,
-            "status": "processing"
+            "status": "processing",
+            "processed_emails_count": len(result.get("processed_emails", [])),
+            "saved_emails": result.get("saved_emails", [])
         }
     except HTTPException:
         raise

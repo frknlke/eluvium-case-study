@@ -1,10 +1,8 @@
-from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+from .providers.gpt import GPT
 
-class NamedEntityRecognition:
+class EntitiyRecognizer:
     def __init__(self):
-        self.tokenizer = AutoTokenizer.from_pretrained("Babelscape/wikineural-multilingual-ner")
-        self.model = AutoModelForTokenClassification.from_pretrained("Babelscape/wikineural-multilingual-ner")
-        self.nlp = pipeline("ner", model=self.model, tokenizer=self.tokenizer, grouped_entities=True)
+        self.inference_provider = GPT()
 
     def recognize(self, text: str):
-        return self.nlp(text)
+        return self.inference_provider.recognize(text)

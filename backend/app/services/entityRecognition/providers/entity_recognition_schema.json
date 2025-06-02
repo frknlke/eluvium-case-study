@@ -1,0 +1,125 @@
+{
+    "format": {
+      "type": "json_schema",
+      "name": "sales_order_email",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string",
+            "description": "The main purpose of the email.",
+            "enum": [
+              "place_order",
+              "inquire_availability",
+              "request_invoice",
+              "confirm_delivery_date",
+              "change_order",
+              "cancel_order",
+              "inquire_shipping_status",
+              "update_shipping_info",
+              "follow_up",
+              "general_inquiry",
+              "complaint",
+              "request_quote",
+              "send_payment_confirmation",
+              "submit_documents"
+            ]
+          },
+          "customer_organization": {
+            "type": "string",
+            "description": "The sender's company or organization."
+          },
+          "producer_organization": {
+            "type": "string",
+            "description": "The company or organization the sender is contacting."
+          },
+          "people": {
+            "type": "array",
+            "description": "Names of individuals mentioned in the email.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "date_time": {
+            "type": "string",
+            "description": "Delivery date or deadline in following format: <Month> <Day>, <Year>"
+          },
+          "products": {
+            "type": "array",
+            "description": "An array of products mentioned in the email.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_name": {
+                  "type": "string",
+                  "description": "The name of the product."
+                },
+                "model": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The model of the product, if provided."
+                },
+                "quantity": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "The quantity of the product, if provided."
+                }
+              },
+              "required": [
+                "product_name",
+                "model",
+                "quantity"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "monetary_values": {
+            "type": "array",
+            "description": "Prices, invoice amounts, or cost references.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "addresses": {
+            "type": "array",
+            "description": "Shipping or billing addresses.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Contact number mentioned.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "email_addresses": {
+            "type": "array",
+            "description": "Any contact emails mentioned.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "intent",
+          "customer_organization",
+          "producer_organization",
+          "people",
+          "date_time",
+          "products",
+          "monetary_values",
+          "addresses",
+          "phone_number",
+          "email_addresses"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }

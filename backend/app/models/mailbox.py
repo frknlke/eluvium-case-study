@@ -10,15 +10,17 @@ class Provider(str, Enum):
     AWS_SES = 'aws_ses'
 
 class SyncMethod(str, Enum):
-    POLLING = 'polling'
+    API = 'api'
+    IMAP = 'imap'
     WEBHOOK = 'webhook'
-    IMAP_IDLE = 'imap_idle'
-    SES = 'ses'
+    MANUAL = 'manual'
 
 class SyncStatus(str, Enum):
     IDLE = 'idle'
-    RUNNING = 'running'
+    SYNCING = 'syncing'
     ERROR = 'error'
+    COMPLETED = 'completed'
+    PAUSED = 'paused'
 
 class MailboxCreate(BaseModel):
     company_id: Optional[str] = None
